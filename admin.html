@@ -360,32 +360,28 @@
             });
         }
 
-        async function deletePhoto(photoId, imageUrl) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette photo ?')) {
-                return;
-            }
+async function deletePhoto(photoId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette photo ?')) {
+        return;
+    }
 
-            const loading = document.getElementById('loading');
-            loading.style.display = 'block';
+    const loading = document.getElementById('loading');
+    loading.style.display = 'block';
 
-            try {
-                // Supprimer l'image de Storage
-                const storageRef = storage.refFromURL(imageUrl);
-                await storageRef.delete();
+    try {
+        // Supprimer uniquement le document de Firestore (pas besoin de supprimer de Storage)
+        await db.collection("matchPhotos").doc(photoId).delete();
 
-                // Supprimer le document de Firestore
-                await db.collection("matchPhotos").doc(photoId).delete();
-
-                // Recharger les photos
-                await loadPhotosForAdmin();
-                alert('Photo supprimée avec succès !');
-            } catch (error) {
-                console.error("Erreur : ", error);
-                alert("Erreur lors de la suppression de la photo.");
-            } finally {
-                loading.style.display = 'none';
-            }
-        }
+        // Recharger les photos
+        await loadPhotosForAdmin();
+        alert('Photo supprimée avec succès !');
+    } catch (error) {
+        console.error("Erreur : ", error);
+        alert("Erreur lors de la suppression de la photo.");
+    } finally {
+        loading.style.display = 'none';
+    }
+}
     </script>
 </body>
 </html>
