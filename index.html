@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galerie de Matchs - Firebase</title>
+    <title>Galerie de Matchs - Colin Champain</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
@@ -46,10 +46,9 @@
             text-align: center;
             margin-bottom: 40px;
             color: var(--text-primary);
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            letter-spacing: 1px;
         }
 
         /* Formulaire compact */
@@ -69,7 +68,6 @@
             margin-bottom: 20px;
             color: var(--text-primary);
             font-size: 1.5rem;
-            font-weight: 600;
         }
 
         .form-group {
@@ -81,7 +79,6 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--text-secondary);
-            font-size: 1rem;
         }
 
         input[type="file"],
@@ -93,14 +90,6 @@
             font-size: 14px;
             background-color: var(--bg-input);
             color: var(--text-primary);
-            transition: all 0.3s;
-        }
-
-        input[type="file"]:focus,
-        input[type="text"]:focus {
-            border-color: var(--accent-victoire);
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
-            outline: none;
         }
 
         .checkbox-group {
@@ -120,14 +109,6 @@
             width: 18px;
             height: 18px;
             accent-color: var(--accent-victoire);
-            cursor: pointer;
-        }
-
-        .checkbox-group label {
-            font-weight: 500;
-            cursor: pointer;
-            margin-bottom: 0;
-            font-size: 0.9rem;
         }
 
         button {
@@ -139,18 +120,11 @@
             cursor: pointer;
             font-size: 1rem;
             font-weight: 600;
-            transition: all 0.3s;
             width: 100%;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-top: 10px;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        /* Filtres */
         .filters {
             display: flex;
             justify-content: center;
@@ -160,22 +134,14 @@
         }
 
         .filters select {
-            padding: 10px 15px;
+            padding: 10px;
             border: 1px solid var(--border-glow);
             border-radius: 6px;
-            font-size: 14px;
             background-color: var(--bg-input);
             color: var(--text-primary);
             cursor: pointer;
-            min-width: 180px;
         }
 
-        .filters select:focus {
-            border-color: var(--accent-victoire);
-            outline: none;
-        }
-
-        /* Galerie */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -187,26 +153,19 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: var(--shadow-glow);
-            transition: all 0.3s;
-            cursor: pointer;
             border: 1px solid var(--border-glow);
-            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
         }
 
         .photo-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
         .photo-card img {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            transition: transform 0.5s;
-        }
-
-        .photo-card:hover img {
-            transform: scale(1.05);
         }
 
         .photo-info {
@@ -216,23 +175,20 @@
         .photo-info h3 {
             margin-bottom: 8px;
             color: var(--text-primary);
-            font-size: 1.1rem;
         }
 
         .photo-info .score {
             font-weight: 600;
             color: var(--accent-victoire);
             margin-bottom: 8px;
-            font-size: 1rem;
         }
 
-        .photo-info .result {
-            font-style: italic;
+        .result {
             padding: 4px 8px;
             border-radius: 4px;
-            display: inline-block;
             font-weight: 600;
             font-size: 0.9rem;
+            display: inline-block;
         }
 
         .result-victoire {
@@ -263,7 +219,6 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.95);
-            overflow: auto;
         }
 
         .modal-content {
@@ -272,19 +227,15 @@
             max-width: 80%;
             max-height: 80%;
             border-radius: 10px;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
         }
 
         .modal-info {
             color: white;
             text-align: center;
             padding: 20px;
-            font-size: 1.2rem;
             background: var(--bg-card);
             border-radius: 0 0 10px 10px;
             margin-top: -10px;
-            position: relative;
-            z-index: 1001;
         }
 
         .close {
@@ -295,37 +246,15 @@
             font-size: 40px;
             font-weight: bold;
             cursor: pointer;
-            transition: color 0.3s;
         }
 
-        .close:hover {
-            color: var(--accent-defaite);
-        }
-
-        /* Animation pour le modal */
-        @keyframes zoom {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .modal-content {
-            animation: zoom 0.4s;
-        }
-
-        /* Code pour intégrer sur un autre site */
+        /* Code d'intégration */
         .integration-code {
             background: var(--bg-card);
             padding: 20px;
             border-radius: 10px;
             margin-top: 40px;
             border: 1px solid var(--border-glow);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .integration-code h2 {
-            margin-bottom: 15px;
-            color: var(--text-primary);
-            font-size: 1.3rem;
         }
 
         .integration-code pre {
@@ -333,25 +262,15 @@
             padding: 15px;
             border-radius: 6px;
             overflow-x: auto;
-            color: var(--text-primary);
             font-family: 'Courier New', monospace;
             font-size: 13px;
-            line-height: 1.5;
             white-space: pre-wrap;
         }
 
-        .integration-code button {
-            margin-top: 15px;
-            background: linear-gradient(135deg, #3a4a5c, #2a3a4a);
-            width: auto;
-        }
-
-        /* Barre de chargement */
         .loading {
             display: none;
             text-align: center;
             margin: 20px 0;
-            color: var(--text-secondary);
         }
 
         .spinner {
@@ -372,7 +291,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏆 GALERIE DE MATCHS</h1>
+        <h1>🏆 Galerie de Matchs - Colin Champain</h1>
 
         <div class="upload-form">
             <h2>📤 Ajouter une photo</h2>
@@ -426,30 +345,26 @@
             </select>
         </div>
 
-        <div class="gallery" id="gallery">
-            <!-- Les photos seront affichées ici -->
-        </div>
+        <div class="gallery" id="gallery"></div>
 
-        <!-- Modal pour agrandir les photos -->
+        <!-- Modal -->
         <div id="photoModal" class="modal" onclick="closeModal(event)">
             <span class="close">&times;</span>
             <img class="modal-content" id="modalImage">
             <div class="modal-info" id="modalInfo"></div>
         </div>
 
-        <!-- Section pour le code d'intégration -->
+        <!-- Code d'intégration -->
         <div class="integration-code">
             <h2>🔗 Code pour intégrer sur ton autre site</h2>
-            <p>Copie-colle ce code HTML/CSS dans ton autre site pour afficher <strong>toutes les photos des 5 derniers jours</strong>.</p>
-            <pre id="integrationCode">
-<!-- Le code sera généré ici -->
-            </pre>
+            <p>Copie ce code pour afficher les photos des 5 derniers jours.</p>
+            <pre id="integrationCode"></pre>
             <button onclick="copyIntegrationCode()">📋 Copier le code</button>
         </div>
     </div>
 
     <script>
-        // Configuration Firebase (à remplacer par la tienne)
+        // 🔥 Remplace cette configuration par la tienne (depuis Firebase Console)
         const firebaseConfig = {
             apiKey: "TU_API_KEY",
             authDomain: "TU_PROJET.firebaseapp.com",
@@ -468,13 +383,12 @@
         let photos = [];
         let filteredPhotos = [];
 
-        // Charger les données au démarrage
+        // Charger les photos depuis Firebase
         document.addEventListener('DOMContentLoaded', () => {
             loadPhotosFromFirebase();
             document.getElementById('photoForm').addEventListener('submit', handleFormSubmit);
         });
 
-        // Charger les photos depuis Firebase
         async function loadPhotosFromFirebase() {
             const loading = document.getElementById('loading');
             loading.style.display = 'block';
@@ -490,14 +404,13 @@
                 updateTeamFilter();
                 updateIntegrationCode();
             } catch (error) {
-                console.error("Erreur lors du chargement des photos : ", error);
+                console.error("Erreur : ", error);
                 alert("Erreur lors du chargement des photos.");
             } finally {
                 loading.style.display = 'none';
             }
         }
 
-        // Gérer la soumission du formulaire
         async function handleFormSubmit(e) {
             e.preventDefault();
 
@@ -516,7 +429,6 @@
             const isDefaite = defaiteCheckbox.checked;
             const score = scoreInput.value.trim();
 
-            // Validation
             if (!file || !team || !score) {
                 alert('Veuillez remplir tous les champs.');
                 return;
@@ -527,7 +439,6 @@
                 return;
             }
 
-            // Désactiver le bouton pendant le chargement
             submitButton.disabled = true;
             document.getElementById('loading').style.display = 'block';
 
@@ -549,21 +460,17 @@
                     date: new Date().toISOString()
                 });
 
-                // Recharger les photos
                 await loadPhotosFromFirebase();
-
-                // Réinitialiser le formulaire
                 document.getElementById('photoForm').reset();
             } catch (error) {
-                console.error("Erreur lors de l'upload : ", error);
-                alert("Erreur lors de l'upload de la photo.");
+                console.error("Erreur : ", error);
+                alert("Erreur lors de l'upload.");
             } finally {
                 submitButton.disabled = false;
                 document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // Afficher la galerie
         function renderGallery() {
             const gallery = document.getElementById('gallery');
             gallery.innerHTML = '';
@@ -575,7 +482,7 @@
 
                 const img = document.createElement('img');
                 img.src = photo.imageUrl;
-                img.alt = `Photo de ${photo.team} - ${photo.score}`;
+                img.alt = `${photo.team} - ${photo.score}`;
 
                 const photoInfo = document.createElement('div');
                 photoInfo.className = 'photo-info';
@@ -599,8 +506,6 @@
                 } else if (photo.defaite) {
                     result.textContent = 'Défaite';
                     result.classList.add('result-defaite');
-                } else {
-                    result.textContent = 'Résultat non spécifié';
                 }
 
                 photoInfo.appendChild(teamName);
@@ -612,7 +517,6 @@
             });
         }
 
-        // Mettre à jour le filtre des équipes
         function updateTeamFilter() {
             const teamFilter = document.getElementById('teamFilter');
             const teams = [...new Set(photos.map(photo => photo.team))];
@@ -626,7 +530,6 @@
             });
         }
 
-        // Filtrer les photos
         function filterPhotos() {
             const teamFilter = document.getElementById('teamFilter').value;
             const resultFilter = document.getElementById('resultFilter').value;
@@ -647,7 +550,6 @@
             renderGallery();
         }
 
-        // Ouvrir le modal
         function openModal(photo) {
             const modal = document.getElementById('photoModal');
             const modalImage = document.getElementById('modalImage');
@@ -661,49 +563,39 @@
             if (photo.defaite) resultText = '❌ Défaite';
 
             modalInfo.innerHTML = `
-                <strong style="font-size: 1.3rem; color: var(--accent-victoire);">${photo.team}</strong><br>
-                <span style="font-size: 1.1rem;">Score : ${photo.score}</span><br>
-                <span style="font-size: 1.1rem;">${resultText}</span>
+                <strong>${photo.team}</strong><br>
+                Score : ${photo.score}<br>
+                ${resultText}
             `;
 
             modal.style.display = 'block';
         }
 
-        // Fermer le modal
         function closeModal(event) {
             if (event.target.classList.contains('modal') || event.target.classList.contains('close')) {
                 document.getElementById('photoModal').style.display = 'none';
             }
         }
 
-        // Filtrer les photos des 5 derniers jours
         function getRecentPhotos() {
             const now = new Date();
             const fiveDaysAgo = new Date(now.getTime() - (5 * 24 * 60 * 60 * 1000));
-
-            return photos.filter(photo => {
-                const photoDate = new Date(photo.date);
-                return photoDate >= fiveDaysAgo;
-            });
+            return photos.filter(photo => new Date(photo.date) >= fiveDaysAgo);
         }
 
-        // Mettre à jour le code d'intégration
         function updateIntegrationCode() {
             const integrationCode = document.getElementById('integrationCode');
             const recentPhotos = getRecentPhotos();
 
             if (recentPhotos.length === 0) {
-                integrationCode.textContent = "Aucune photo ajoutée dans les 5 derniers jours.";
+                integrationCode.textContent = "Aucune photo dans les 5 derniers jours.";
                 return;
             }
 
-            // Générer le code HTML pour toutes les photos récentes
-            let code = `<div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; padding: 15px; background: #0a0a0a; border-radius: 8px; max-width: 100%; overflow: auto;">\n`;
-
+            let code = `<div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; background: #0a0a0a; padding: 15px; border-radius: 8px;">\n`;
             recentPhotos.forEach(photo => {
                 let resultStyle = '';
                 let resultText = '';
-
                 if (photo.victoire) {
                     resultStyle = `background: rgba(76, 175, 80, 0.2); border: 1px solid #4caf50; color: #4caf50;`;
                     resultText = 'Victoire';
@@ -716,29 +608,25 @@
                 }
 
                 code += `
-    <div style="background: #121212; border-radius: 8px; padding: 8px; box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.1); max-width: 250px; color: white; font-family: Arial, sans-serif; margin-bottom: 10px;">
-        <img src="${photo.imageUrl}" alt="${photo.team}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px;">
+    <div style="background: #121212; border-radius: 8px; padding: 8px; border: 1px solid rgba(255, 255, 255, 0.1); max-width: 250px;">
+        <img src="${photo.imageUrl}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px;">
         <div style="padding: 0 8px;">
-            <h3 style="margin: 0 0 4px 0; color: #e0e0e0; font-size: 1rem;">${photo.team}</h3>
-            <div style="font-size: 0.95rem; color: #4caf50; margin-bottom: 4px;">Score : ${photo.score}</div>
-            <div style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; ${resultStyle}">
-                ${resultText}
-            </div>
+            <div style="color: #e0e0e0; font-weight: bold;">${photo.team}</div>
+            <div style="color: #4caf50;">Score : ${photo.score}</div>
+            <div style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; ${resultStyle}">${resultText}</div>
         </div>
     </div>\n`;
             });
-
             code += `</div>`;
             integrationCode.textContent = code;
         }
 
-        // Copier le code d'intégration
         function copyIntegrationCode() {
             const codeElement = document.getElementById('integrationCode');
             navigator.clipboard.writeText(codeElement.textContent)
-                .then(() => alert('Code copié dans le presse-papiers !'))
-                .catch(err => console.error('Erreur lors de la copie : ', err));
+                .then(() => alert('Code copié !'))
+                .catch(err => console.error('Erreur : ', err));
         }
     </script>
 </body>
-</html>-
+</html>
