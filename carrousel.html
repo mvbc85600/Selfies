@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carrousel des Équipes</title>
+
+<style>
+/* =====================================================
+   RESET
+===================================================== */
+
+*
+    box-sizing: border-box;
+
+html,
+body {
+
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden !important;
+
+    background: #000;
+
+    color: #fff;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+}
+
+/* =====================================================
+   FOND
+===================================================== */
+
+body {
+
+    position: relative;
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            #252000 0%,
+            #100e00 35%,
+            #050500 65%,
+            #000 100%
+        );
+
+}
+
+/* =====================================================
+   HALO CENTRAL DU FOND
+===================================================== */
+
+body::before {
+
+    content: "";
+
+    position: fixed;
+
+    width: 900px;
+    height: 900px;
+
+    left: 50%;
+    top: 52%;
+
+    transform: translate(-50%, -50%);
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(255,204,0,0.20) 0%,
+            rgba(255,204,0,0.08) 25%,
+            rgba(255,204,0,0.02) 50%,
+            transparent 70%
+        );
+
+    pointer-events: none;
+
+    animation: halo 4s ease-in-out infinite;
+
+}
+
+@keyframes halo {
+
+    0% {
+
+        transform:
+            translate(-50%, -50%)
+            scale(0.90);
+
+        opacity: 0.65;
+
+    }
+
+    50% {
+
+        transform:
+            translate(-50%, -50%)
+            scale(1.10);
+
+        opacity: 1;
+
+    }
+
+    100% {
+
+        transform:
+            translate(-50%, -50%)
+            scale(0.90);
+
+        opacity: 0.65;
+
+    }
+
+}
+
+/* =====================================================
+   TITRE
+===================================================== */
+
+h1 {
+
+    position: relative;
+
+    z-index: 50;
+
+    margin: 25px 0 0 0;
+
+    text-align: center;
+
+    font-size: 54px;
+
+    font-weight: 900;
+
+    letter-spacing: 7px;
+
+    color: #ffffff;
+
+}
+
+/* =====================================================
+   LIGNE SOUS LE TITRE
+===================================================== */
+
+h1::after {
+
+    content: "";
+
+    display: block;
+
+    width: 300px;
+
+    height: 4px;
+
+    margin: 15px auto 0;
+
+    background: #ffffff;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 0 10px #ffffff,
+        0 0 25px #ffffff;
+
+}
+
+/* =====================================================
+   CARROUSEL
+===================================================== */
+
+.carousel {
+
+    position: relative;
+
+    width: 100%;
+
+    height: calc(100vh - 130px);
+
+    min-height: 650px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    perspective: 1800px;
+
+    perspective-origin: center center;
+
+}
+
+/* =====================================================
+   CARTES DES PHOTOS (remplace les LOGOS)
+===================================================== */
+
+.carousel .photo-card {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform-origin: center center;
+
+    width: auto;
+    height: auto;
+
+    max-width: 740px;
+    max-height: 495px;
+
+    padding: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(30,30,30,0.98),
+            rgba(5,5,5,0.98)
+        );
+
+    border: 4px solid;
+    border-radius: 24px;
+
+    transition:
+        transform 0.9s cubic-bezier(.22,.61,.36,1),
+        opacity 0.9s ease,
+        filter 0.9s ease,
+        box-shadow 0.9s ease,
+        border-color 0.9s ease;
+
+    will-change:
+        transform,
+        opacity;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+.carousel .photo-card img {
+    width: 100%;
+    height: 80%;
+    object-fit: cover;
+    border-radius: 16px;
+    margin-bottom: 10px;
+}
+
+.carousel .photo-info {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+}
+
+.carousel .photo-info h3 {
+    margin: 0 0 5px 0;
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.carousel .photo-info .score {
+    font-weight: 600;
+    color: #ffcc00;
+    margin: 5px 0;
+    font-size: 1.2rem;
+}
+
+.carousel .photo-info .result {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.result-victoire {
+    background-color: rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+    border: 1px solid #4caf50;
+}
+
+.result-nul {
+    background-color: rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    border: 1px solid #ffc107;
+}
+
+.result-defaite {
+    background-color: rgba(244, 67, 54, 0.3);
+    color: #f44336;
+    border: 1px solid #f44336;
+}
+
+/* =====================================================
+   COULEUR JAUNE (Victoire)
+===================================================== */
+
+.color-yellow {
+    border-color: #ffcc00 !important;
+}
+
+/* =====================================================
+   COULEUR ROUGE (Défaite)
+===================================================== */
+
+.color-red {
+    border-color: #ff2020 !important;
+}
+
+/* =====================================================
+   COULEUR BLEUE (Match nul)
+===================================================== */
+
+.color-blue {
+    border-color: #168cff !important;
+}
+
+/* =====================================================
+   PHOTO CENTRALE
+===================================================== */
+
+.center {
+    transform:
+        translate(-50%, -50%)
+        translateZ(300px)
+        scale(1.10);
+
+    z-index: 20;
+
+    opacity: 1;
+
+    filter:
+        brightness(1.15)
+        contrast(1.08);
+}
+
+/* =====================================================
+   HALO CENTRAL JAUNE (Victoire)
+===================================================== */
+
+.center.color-yellow {
+    box-shadow:
+        0 0 20px #ffcc00,
+        0 0 45px #ffcc00,
+        0 0 90px rgba(255,204,0,0.85),
+        0 0 140px rgba(255,204,0,0.35);
+}
+
+/* =====================================================
+   HALO CENTRAL ROUGE (Défaite)
+===================================================== */
+
+.center.color-red {
+    box-shadow:
+        0 0 20px #ff2020,
+        0 0 45px #ff2020,
+        0 0 90px rgba(255,32,32,0.85),
+        0 0 140px rgba(255,32,32,0.35);
+}
+
+/* =====================================================
+   HALO CENTRAL BLEU (Match nul)
+===================================================== */
+
+.center.color-blue {
+    box-shadow:
+        0 0 20px #168cff,
+        0 0 45px #168cff,
+        0 0 90px rgba(22,140,255,0.85),
+        0 0 140px rgba(22,140,255,0.35);
+}
+
+/* =====================================================
+   GAUCHE 1
+===================================================== */
+
+.left1 {
+    transform:
+        translate(-50%, -50%)
+        translateX(-540px)
+        translateZ(40px)
+        scale(0.62);
+
+    z-index: 12;
+
+    opacity: 0.75;
+
+    filter:
+        brightness(0.75)
+        contrast(0.95);
+}
+
+/* =====================================================
+   GAUCHE 2
+===================================================== */
+
+.left2 {
+    transform:
+        translate(-50%, -50%)
+        translateX(-860px)
+        translateZ(-250px)
+        scale(0.41);
+
+    z-index: 8;
+
+    opacity: 0.38;
+
+    filter:
+        brightness(0.55)
+        blur(0.3px);
+}
+
+/* =====================================================
+   DROITE 1
+===================================================== */
+
+.right1 {
+    transform:
+        translate(-50%, -50%)
+        translateX(540px)
+        translateZ(40px)
+        scale(0.62);
+
+    z-index: 12;
+
+    opacity: 0.75;
+
+    filter:
+        brightness(0.75)
+        contrast(0.95);
+}
+
+/* =====================================================
+   DROITE 2
+===================================================== */
+
+.right2 {
+    transform:
+        translate(-50%, -50%)
+        translateX(860px)
+        translateZ(-250px)
+        scale(0.41);
+
+    z-index: 8;
+
+    opacity: 0.38;
+
+    filter:
+        brightness(0.55)
+        blur(0.3px);
+}
+
+/* =====================================================
+   PHOTOS CACHÉES
+===================================================== */
+
+.hidden {
+    transform:
+        translate(-50%, -50%)
+        translateZ(-700px)
+        scale(0.15);
+
+    opacity: 0;
+
+    filter: blur(5px);
+
+    z-index: 1;
+
+    pointer-events: none;
+}
+
+/* =====================================================
+   BARRE LUMINEUSE
+===================================================== */
+
+.light-line {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 65%;
+    height: 3px;
+    background: #ffcc00;
+    box-shadow:
+        0 0 10px #ffcc00,
+        0 0 25px #ffcc00,
+        0 0 50px #ffcc00;
+    z-index: 90;
+    transition:
+        background 0.9s ease,
+        box-shadow 0.9s ease;
+}
+
+/* =====================================================
+   ÉCRANS 1600PX ET MOINS
+===================================================== */
+
+@media (max-width: 1600px) {
+    .carousel .photo-card {
+        max-width: 680px;
+        max-height: 460px;
+    }
+
+    .center {
+        transform:
+            translate(-50%, -50%)
+            translateZ(250px)
+            scale(1.02);
+    }
+
+    .left1 {
+        transform:
+            translate(-50%, -50%)
+            translateX(-450px)
+            translateZ(30px)
+            scale(0.55);
+    }
+
+    .right1 {
+        transform:
+            translate(-50%, -50%)
+            translateX(450px)
+            translateZ(30px)
+            scale(0.55);
+    }
+
+    .left2 {
+        transform:
+            translate(-50%, -50%)
+            translateX(-700px)
+            translateZ(-200px)
+            scale(0.36);
+    }
+
+    .right2 {
+        transform:
+            translate(-50%, -50%)
+            translateX(700px)
+            translateZ(-200px)
+            scale(0.36);
+    }
+}
+
+/* =====================================================
+   ÉCRANS 1200PX ET MOINS
+===================================================== */
+
+@media (max-width: 1200px) {
+    h1 {
+        font-size: 42px;
+    }
+
+    .carousel {
+        min-height: 550px;
+    }
+
+    .carousel .photo-card {
+        max-width: 570px;
+        max-height: 387px;
+    }
+
+    .center {
+        transform:
+            translate(-50%, -50%)
+            translateZ(180px)
+            scale(0.98);
+    }
+
+    .left1 {
+        transform:
+            translate(-50%, -50%)
+            translateX(-330px)
+            translateZ(20px)
+            scale(0.48);
+    }
+
+    .right1 {
+        transform:
+            translate(-50%, -50%)
+            translateX(330px)
+            translateZ(20px)
+            scale(0.48);
+    }
+
+    .left2,
+    .right2 {
+        opacity: 0;
+    }
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+    h1 {
+        font-size: 28px;
+        letter-spacing: 3px;
+        margin-top: 20px;
+    }
+
+    h1::after {
+        width: 180px;
+        margin-top: 10px;
+    }
+
+    .carousel {
+        height: calc(100vh - 120px);
+        min-height: 400px;
+    }
+
+    .carousel .photo-card {
+        max-width: 85vw;
+        max-height: 360px;
+        padding: 15px;
+    }
+
+    .center {
+        transform:
+            translate(-50%, -50%)
+            scale(0.92);
+    }
+
+    .left1 {
+        transform:
+            translate(-50%, -50%)
+            translateX(-190px)
+            scale(0.40);
+    }
+
+    .right1 {
+        transform:
+            translate(-50%, -50%)
+            translateX(190px)
+            scale(0.40);
+    }
+
+    .left2,
+    .right2 {
+        display: none;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     TITRE
+===================================================== -->
+
+<h1>CARROUSEL DES ÉQUIPES</h1>
+
+<!-- =====================================================
+     CARROUSEL
+===================================================== -->
+
+<div class="carousel" id="carousel"></div>
+
+<!-- =====================================================
+     BARRE LUMINEUSE
+===================================================== -->
+
+<div class="light-line"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+<script>
+    // Configuration Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAX3VP1XWnjTfD3lniuG2EvdDy_lh3kDhE",
+        authDomain: "selfies-c6de9.firebaseapp.com",
+        projectId: "selfies-c6de9",
+        storageBucket: "selfies-c6de9.appspot.com",
+        messagingSenderId: "491431782473",
+        appId: "1:491431782473:web:822defb7265176458e7798"
+    };
+
+    // Initialiser Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Variables globales
+    let photos = [];
+    let logos = [];
+    let index = 0;
+    let interval = null;
+    let carouselStarted = false;
+
+    // Couleurs des encadrés (Victoire = Jaune, Défaite = Rouge, Match nul = Bleu)
+    const colors = ["color-yellow", "color-red", "color-blue"];
+
+    // Récupérer les photos depuis Firestore
+    async function loadPhotosFromFirestore() {
+        try {
+            const querySnapshot = await db.collection("matchPhotos").orderBy("date", "desc").get();
+            photos = [];
+            querySnapshot.forEach((doc) => {
+                photos.push({ id: doc.id, ...doc.data() });
+            });
+            createAllPhotos();
+        } catch (error) {
+            console.error("Erreur : ", error);
+            alert("Erreur lors du chargement des photos.");
+        }
+    }
+
+    // Créer toutes les cartes de photos
+    function createAllPhotos() {
+        const carousel = document.getElementById("carousel");
+        carousel.innerHTML = '';
+
+        photos.forEach((photo, photoIndex) => {
+            const photoCard = document.createElement("div");
+            photoCard.className = "photo-card hidden " + getColor(photoIndex);
+
+            const img = document.createElement("img");
+            img.src = photo.imageBase64;
+            img.alt = `${photo.team} - ${photo.score}`;
+
+            const photoInfo = document.createElement("div");
+            photoInfo.className = "photo-info";
+
+            const teamName = document.createElement("h3");
+            teamName.textContent = photo.team;
+
+            const score = document.createElement("div");
+            score.className = "score";
+            score.textContent = `Score : ${photo.score}`;
+
+            const result = document.createElement("div");
+            result.className = "result";
+
+            if (photo.victoire) {
+                result.textContent = 'Victoire';
+                result.classList.add('result-victoire');
+            } else if (photo.matchNul) {
+                result.textContent = 'Match nul';
+                result.classList.add('result-nul');
+            } else if (photo.defaite) {
+                result.textContent = 'Défaite';
+                result.classList.add('result-defaite');
+            }
+
+            photoInfo.appendChild(teamName);
+            photoInfo.appendChild(score);
+            photoInfo.appendChild(result);
+            photoCard.appendChild(img);
+            photoCard.appendChild(photoInfo);
+            carousel.appendChild(photoCard);
+            logos.push(photoCard);
+        });
+
+        // Démarrer le carrousel
+        startCarousel();
+    }
+
+    // Obtenir la couleur en fonction de l'index
+    function getColor(photoIndex) {
+        if (photos[photoIndex].victoire) return "color-yellow";
+        if (photos[photoIndex].defaite) return "color-red";
+        return "color-blue"; // Match nul
+    }
+
+    // Mettre à jour la barre lumineuse
+    function updateLightLine() {
+        const lightLine = document.querySelector(".light-line");
+        if (!lightLine) return;
+
+        const currentColor = getColor(index);
+        let color;
+        if (currentColor === "color-yellow") color = "#ffcc00";
+        else if (currentColor === "color-red") color = "#ff2020";
+        else color = "#168cff";
+
+        lightLine.style.background = color;
+        lightLine.style.boxShadow = `0 0 10px ${color}, 0 0 25px ${color}, 0 0 50px ${color}`;
+    }
+
+    // Mettre à jour le carrousel
+    function updateCarousel() {
+        const total = logos.length;
+        if (total === 0) return;
+
+        for (let i = 0; i < total; i++) {
+            logos[i].className = "photo-card hidden " + getColor(i);
+        }
+
+        const center = index % total;
+        const left1 = (index - 1 + total) % total;
+        const left2 = (index - 2 + total) % total;
+        const right1 = (index + 1) % total;
+        const right2 = (index + 2) % total;
+
+        logos[center].className = "photo-card center " + getColor(center);
+        logos[left1].className = "photo-card left1 " + getColor(left1);
+        logos[left2].className = "photo-card left2 " + getColor(left2);
+        logos[right1].className = "photo-card right1 " + getColor(right1);
+        logos[right2].className = "photo-card right2 " + getColor(right2);
+
+        updateLightLine();
+        localStorage.setItem("photoIndex", index);
+    }
+
+    // Rotation du carrousel
+    function rotateCarousel() {
+        if (logos.length === 0) return;
+        index = (index + 1) % logos.length;
+        updateCarousel();
+    }
+
+    // Démarrer le carrousel
+    function startCarousel() {
+        if (interval) {
+            clearTimeout(interval);
+            interval = null;
+        }
+
+        if (!carouselStarted || logos.length === 0) return;
+
+        const duration = 3000; // 3 secondes par photo
+        interval = setTimeout(() => {
+            rotateCarousel();
+            startCarousel();
+        }, duration);
+    }
+
+    // Initialisation
+    async function init() {
+        await loadPhotosFromFirestore();
+
+        if (photos.length === 0) {
+            console.error("Aucune photo trouvée dans Firestore.");
+            return;
+        }
+
+        const savedIndex = localStorage.getItem("photoIndex");
+        if (savedIndex !== null && !isNaN(parseInt(savedIndex))) {
+            index = parseInt(savedIndex);
+            index = (index % logos.length + logos.length) % logos.length;
+        } else {
+            index = 0;
+        }
+
+        updateCarousel();
+        carouselStarted = true;
+        startCarousel();
+    }
+
+    // Lancement
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+</script>
+
+</body>
+</html>
