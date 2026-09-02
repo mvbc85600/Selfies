@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galerie de Matchs - Firebase</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #121212;
+            --bg-input: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-victoire: #4caf50;
+            --accent-nul: #ffc107;
+            --accent-defaite: #f44336;
+            --border-glow: rgba(255, 255, 255, 0.1);
+            --shadow-glow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        /* Formulaire compact */
+        .upload-form {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-glow);
+            margin-bottom: 40px;
+            border: 1px solid var(--border-glow);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .upload-form h2 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-glow);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        input[type="file"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--accent-victoire);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            outline: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-group div {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-victoire);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-victoire), #2e7d32);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Filtres */
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filters select {
+            padding: 10px 15px;
+            border: 1px solid var(--border-glow);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        .filters select:focus {
+            border-color: var(--accent-victoire);
+            outline: none;
+        }
+
+        /* Galerie */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .photo-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-glow);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid var(--border-glow);
+            position: relative;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .photo-info {
+            padding: 15px;
+        }
+
+        .photo-info h3 {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .photo-info .score {
+            font-weight: 600;
+            color: var(--accent-victoire);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .photo-info .result {
+            font-style: italic;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .result-victoire {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--accent-victoire);
+            border: 1px solid var(--accent-victoire);
+        }
+
+        .result-nul {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: var(--accent-nul);
+            border: 1px solid var(--accent-nul);
+        }
+
+        .result-defaite {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--accent-defaite);
+            border: 1px solid var(--accent-defaite);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            overflow: auto;
+        }
+
+        .modal-content {
+            margin: 5% auto;
+            display: block;
+            max-width: 80%;
+            max-height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-info {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            background: var(--bg-card);
+            border-radius: 0 0 10px 10px;
+            margin-top: -10px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: var(--accent-defaite);
+        }
+
+        /* Animation pour le modal */
+        @keyframes zoom {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content {
+            animation: zoom 0.4s;
+        }
+
+        /* Code pour intégrer sur un autre site */
+        .integration-code {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 40px;
+            border: 1px solid var(--border-glow);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .integration-code h2 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+        }
+
+        .integration-code pre {
+            background: var(--bg-input);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .integration-code button {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #3a4a5c, #2a3a4a);
+            width: auto;
+        }
+
+        /* Barre de chargement */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--accent-victoire);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 GALERIE DE MATCHS</h1>
+
+        <div class="upload-form">
+            <h2>📤 Ajouter une photo</h2>
+            <form id="photoForm">
+                <div class="form-group">
+                    <label for="team">Nom de l'équipe :</label>
+                    <input type="text" id="team" placeholder="Ex: PSG, OM..." required>
+                </div>
+                <div class="form-group">
+                    <label for="photo">Photo :</label>
+                    <input type="file" id="photo" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label>Résultat du match :</label>
+                    <div class="checkbox-group">
+                        <div>
+                            <input type="checkbox" id="victoire" name="result" value="Victoire">
+                            <label for="victoire">✅ Victoire</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="matchNul" name="result" value="Match nul">
+                            <label for="matchNul">⚖️ Match nul</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="defaite" name="result" value="Défaite">
+                            <label for="defaite">❌ Défaite</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="score">Score :</label>
+                    <input type="text" id="score" placeholder="Ex: 21-22" required>
+                </div>
+                <button type="submit" id="submitButton">🚀 Ajouter la photo</button>
+            </form>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Chargement en cours...</p>
+            </div>
+        </div>
+
+        <div class="filters">
+            <select id="teamFilter" onchange="filterPhotos()">
+                <option value="all">🌍 Toutes les équipes</option>
+            </select>
+            <select id="resultFilter" onchange="filterPhotos()">
+                <option value="all">📊 Tous les résultats</option>
+                <option value="Victoire">✅ Victoires</option>
+                <option value="Match nul">⚖️ Matchs nuls</option>
+                <option value="Défaite">❌ Défaites</option>
+            </select>
+        </div>
+
+        <div class="gallery" id="gallery">
+            <!-- Les photos seront affichées ici -->
+        </div>
+
+        <!-- Modal pour agrandir les photos -->
+        <div id="photoModal" class="modal" onclick="closeModal(event)">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage">
+            <div class="modal-info" id="modalInfo"></div>
+        </div>
+
+        <!-- Section pour le code d'intégration -->
+        <div class="integration-code">
+            <h2>🔗 Code pour intégrer sur ton autre site</h2>
+            <p>Copie-colle ce code HTML/CSS dans ton autre site pour afficher <strong>toutes les photos des 5 derniers jours</strong>.</p>
+            <pre id="integrationCode">
+<!-- Le code sera généré ici -->
+            </pre>
+            <button onclick="copyIntegrationCode()">📋 Copier le code</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration Firebase (à remplacer par la tienne)
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_PROJET.firebaseapp.com",
+            projectId: "TU_PROJET",
+            storageBucket: "TU_PROJET.appspot.com",
+            messagingSenderId: "TU_SENDER_ID",
+            appId: "TU_APP_ID"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Variables globales
+        let photos = [];
+        let filteredPhotos = [];
+
+        // Charger les données au démarrage
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPhotosFromFirebase();
+            document.getElementById('photoForm').addEventListener('submit', handleFormSubmit);
+        });
+
+        // Charger les photos depuis Firebase
+        async function loadPhotosFromFirebase() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                const querySnapshot = await db.collection("matchPhotos").orderBy("date", "desc").get();
+                photos = [];
+                querySnapshot.forEach((doc) => {
+                    photos.push({ id: doc.id, ...doc.data() });
+                });
+                filteredPhotos = [...photos];
+                renderGallery();
+                updateTeamFilter();
+                updateIntegrationCode();
+            } catch (error) {
+                console.error("Erreur lors du chargement des photos : ", error);
+                alert("Erreur lors du chargement des photos.");
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Gérer la soumission du formulaire
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const teamInput = document.getElementById('team');
+            const photoInput = document.getElementById('photo');
+            const victoireCheckbox = document.getElementById('victoire');
+            const matchNulCheckbox = document.getElementById('matchNul');
+            const defaiteCheckbox = document.getElementById('defaite');
+            const scoreInput = document.getElementById('score');
+            const submitButton = document.getElementById('submitButton');
+
+            const team = teamInput.value.trim();
+            const file = photoInput.files[0];
+            const isVictoire = victoireCheckbox.checked;
+            const isMatchNul = matchNulCheckbox.checked;
+            const isDefaite = defaiteCheckbox.checked;
+            const score = scoreInput.value.trim();
+
+            // Validation
+            if (!file || !team || !score) {
+                alert('Veuillez remplir tous les champs.');
+                return;
+            }
+
+            if ((isVictoire && isMatchNul) || (isVictoire && isDefaite) || (isMatchNul && isDefaite)) {
+                alert('Veuillez choisir UN SEUL résultat.');
+                return;
+            }
+
+            // Désactiver le bouton pendant le chargement
+            submitButton.disabled = true;
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                // Upload de l'image dans Firebase Storage
+                const storageRef = storage.ref();
+                const fileRef = storageRef.child(`matchPhotos/${Date.now()}_${file.name}`);
+                const uploadTask = await fileRef.put(file);
+                const imageUrl = await uploadTask.ref.getDownloadURL();
+
+                // Ajouter les données dans Firestore
+                await db.collection("matchPhotos").add({
+                    team: team,
+                    imageUrl: imageUrl,
+                    victoire: isVictoire,
+                    matchNul: isMatchNul,
+                    defaite: isDefaite,
+                    score: score,
+                    date: new Date().toISOString()
+                });
+
+                // Recharger les photos
+                await loadPhotosFromFirebase();
+
+                // Réinitialiser le formulaire
+                document.getElementById('photoForm').reset();
+            } catch (error) {
+                console.error("Erreur lors de l'upload : ", error);
+                alert("Erreur lors de l'upload de la photo.");
+            } finally {
+                submitButton.disabled = false;
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Afficher la galerie
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            filteredPhotos.forEach((photo) => {
+                const photoCard = document.createElement('div');
+                photoCard.className = 'photo-card';
+                photoCard.onclick = () => openModal(photo);
+
+                const img = document.createElement('img');
+                img.src = photo.imageUrl;
+                img.alt = `Photo de ${photo.team} - ${photo.score}`;
+
+                const photoInfo = document.createElement('div');
+                photoInfo.className = 'photo-info';
+
+                const teamName = document.createElement('h3');
+                teamName.textContent = photo.team;
+
+                const score = document.createElement('div');
+                score.className = 'score';
+                score.textContent = `Score : ${photo.score}`;
+
+                const result = document.createElement('div');
+                result.className = 'result';
+
+                if (photo.victoire) {
+                    result.textContent = 'Victoire';
+                    result.classList.add('result-victoire');
+                } else if (photo.matchNul) {
+                    result.textContent = 'Match nul';
+                    result.classList.add('result-nul');
+                } else if (photo.defaite) {
+                    result.textContent = 'Défaite';
+                    result.classList.add('result-defaite');
+                } else {
+                    result.textContent = 'Résultat non spécifié';
+                }
+
+                photoInfo.appendChild(teamName);
+                photoInfo.appendChild(score);
+                photoInfo.appendChild(result);
+                photoCard.appendChild(img);
+                photoCard.appendChild(photoInfo);
+                gallery.appendChild(photoCard);
+            });
+        }
+
+        // Mettre à jour le filtre des équipes
+        function updateTeamFilter() {
+            const teamFilter = document.getElementById('teamFilter');
+            const teams = [...new Set(photos.map(photo => photo.team))];
+
+            teamFilter.innerHTML = '<option value="all">🌍 Toutes les équipes</option>';
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                teamFilter.appendChild(option);
+            });
+        }
+
+        // Filtrer les photos
+        function filterPhotos() {
+            const teamFilter = document.getElementById('teamFilter').value;
+            const resultFilter = document.getElementById('resultFilter').value;
+
+            filteredPhotos = photos.filter(photo => {
+                const teamMatch = (teamFilter === 'all') || (photo.team === teamFilter);
+                let resultMatch = true;
+
+                if (resultFilter !== 'all') {
+                    if (resultFilter === 'Victoire') resultMatch = photo.victoire;
+                    if (resultFilter === 'Match nul') resultMatch = photo.matchNul;
+                    if (resultFilter === 'Défaite') resultMatch = photo.defaite;
+                }
+
+                return teamMatch && resultMatch;
+            });
+
+            renderGallery();
+        }
+
+        // Ouvrir le modal
+        function openModal(photo) {
+            const modal = document.getElementById('photoModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalInfo = document.getElementById('modalInfo');
+
+            modalImage.src = photo.imageUrl;
+
+            let resultText = '';
+            if (photo.victoire) resultText = '✅ Victoire';
+            if (photo.matchNul) resultText = '⚖️ Match nul';
+            if (photo.defaite) resultText = '❌ Défaite';
+
+            modalInfo.innerHTML = `
+                <strong style="font-size: 1.3rem; color: var(--accent-victoire);">${photo.team}</strong><br>
+                <span style="font-size: 1.1rem;">Score : ${photo.score}</span><br>
+                <span style="font-size: 1.1rem;">${resultText}</span>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        // Fermer le modal
+        function closeModal(event) {
+            if (event.target.classList.contains('modal') || event.target.classList.contains('close')) {
+                document.getElementById('photoModal').style.display = 'none';
+            }
+        }
+
+        // Filtrer les photos des 5 derniers jours
+        function getRecentPhotos() {
+            const now = new Date();
+            const fiveDaysAgo = new Date(now.getTime() - (5 * 24 * 60 * 60 * 1000));
+
+            return photos.filter(photo => {
+                const photoDate = new Date(photo.date);
+                return photoDate >= fiveDaysAgo;
+            });
+        }
+
+        // Mettre à jour le code d'intégration
+        function updateIntegrationCode() {
+            const integrationCode = document.getElementById('integrationCode');
+            const recentPhotos = getRecentPhotos();
+
+            if (recentPhotos.length === 0) {
+                integrationCode.textContent = "Aucune photo ajoutée dans les 5 derniers jours.";
+                return;
+            }
+
+            // Générer le code HTML pour toutes les photos récentes
+            let code = `<div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; padding: 15px; background: #0a0a0a; border-radius: 8px; max-width: 100%; overflow: auto;">\n`;
+
+            recentPhotos.forEach(photo => {
+                let resultStyle = '';
+                let resultText = '';
+
+                if (photo.victoire) {
+                    resultStyle = `background: rgba(76, 175, 80, 0.2); border: 1px solid #4caf50; color: #4caf50;`;
+                    resultText = 'Victoire';
+                } else if (photo.matchNul) {
+                    resultStyle = `background: rgba(255, 193, 7, 0.2); border: 1px solid #ffc107; color: #ffc107;`;
+                    resultText = 'Match nul';
+                } else if (photo.defaite) {
+                    resultStyle = `background: rgba(244, 67, 54, 0.2); border: 1px solid #f44336; color: #f44336;`;
+                    resultText = 'Défaite';
+                }
+
+                code += `
+    <div style="background: #121212; border-radius: 8px; padding: 8px; box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.1); max-width: 250px; color: white; font-family: Arial, sans-serif; margin-bottom: 10px;">
+        <img src="${photo.imageUrl}" alt="${photo.team}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px;">
+        <div style="padding: 0 8px;">
+            <h3 style="margin: 0 0 4px 0; color: #e0e0e0; font-size: 1rem;">${photo.team}</h3>
+            <div style="font-size: 0.95rem; color: #4caf50; margin-bottom: 4px;">Score : ${photo.score}</div>
+            <div style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; ${resultStyle}">
+                ${resultText}
+            </div>
+        </div>
+    </div>\n`;
+            });
+
+            code += `</div>`;
+            integrationCode.textContent = code;
+        }
+
+        // Copier le code d'intégration
+        function copyIntegrationCode() {
+            const codeElement = document.getElementById('integrationCode');
+            navigator.clipboard.writeText(codeElement.textContent)
+                .then(() => alert('Code copié dans le presse-papiers !'))
+                .catch(err => console.error('Erreur lors de la copie : ', err));
+        }
+    </script>
+</body>
+</html>-
