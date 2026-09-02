@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Galerie de Matchs</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #121212;
+            --bg-input: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-victoire: #4caf50;
+            --accent-nul: #ffc107;
+            --accent-defaite: #f44336;
+            --border-glow: rgba(255, 255, 255, 0.1);
+            --shadow-glow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .login-form {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-glow);
+            margin-bottom: 40px;
+            border: 1px solid var(--border-glow);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .login-form h2 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-glow);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-victoire), #2e7d32);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .photo-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-glow);
+            border: 1px solid var(--border-glow);
+            position: relative;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .photo-info {
+            padding: 15px;
+        }
+
+        .photo-info h3 {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .photo-info .score {
+            font-weight: 600;
+            color: var(--accent-victoire);
+            margin-bottom: 8px;
+        }
+
+        .result {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .result-victoire {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--accent-victoire);
+            border: 1px solid var(--accent-victoire);
+        }
+
+        .result-nul {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: var(--accent-nul);
+            border: 1px solid var(--accent-nul);
+        }
+
+        .result-defaite {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--accent-defaite);
+            border: 1px solid var(--accent-defaite);
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-defaite);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--accent-victoire);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: var(--accent-victoire);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin - Galerie de Matchs</h1>
+
+        <div class="login-form">
+            <h2>🔑 Connexion</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="password">Mot de passe :</label>
+                    <input type="password" id="password" placeholder="Entrez le mot de passe" required>
+                </div>
+                <button type="submit">Se connecter</button>
+            </form>
+        </div>
+
+        <div class="admin-content" id="adminContent">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Chargement en cours...</p>
+            </div>
+            <div class="gallery" id="gallery"></div>
+            <div class="back-link">
+                <p><a href="index.html">← Retour à la galerie</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAX3VP1XWnjTfD3lniuG2EvdDy_lh3kDhE",
+            authDomain: "selfies-c6de9.firebaseapp.com",
+            projectId: "selfies-c6de9",
+            storageBucket: "selfies-c6de9.appspot.com",
+            messagingSenderId: "491431782473",
+            appId: "1:491431782473:web:822defb7265176458e7798"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Mot de passe pour l'admin
+        const ADMIN_PASSWORD = "Mvbc85600@";
+
+        // Variables globales
+        let photos = [];
+
+        // Gérer la connexion admin
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const passwordInput = document.getElementById('password');
+            const password = passwordInput.value.trim();
+
+            if (password === ADMIN_PASSWORD) {
+                // Mot de passe correct : afficher le contenu admin
+                document.querySelector('.login-form').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                loadPhotosForAdmin();
+            } else {
+                alert('Mot de passe incorrect !');
+                passwordInput.value = '';
+            }
+        }
+
+        async function loadPhotosForAdmin() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                const querySnapshot = await db.collection("matchPhotos").orderBy("date", "desc").get();
+                photos = [];
+                querySnapshot.forEach((doc) => {
+                    photos.push({ id: doc.id, ...doc.data() });
+                });
+                renderAdminGallery();
+            } catch (error) {
+                console.error("Erreur : ", error);
+                alert("Erreur lors du chargement des photos.");
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderAdminGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            photos.forEach((photo) => {
+                const photoCard = document.createElement('div');
+                photoCard.className = 'photo-card';
+
+                const img = document.createElement('img');
+                img.src = photo.imageUrl;
+                img.alt = `${photo.team} - ${photo.score}`;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-button';
+                deleteButton.innerHTML = '✕';
+                deleteButton.onclick = () => deletePhoto(photo.id, photo.imageUrl);
+
+                const photoInfo = document.createElement('div');
+                photoInfo.className = 'photo-info';
+
+                const teamName = document.createElement('h3');
+                teamName.textContent = photo.team;
+
+                const score = document.createElement('div');
+                score.className = 'score';
+                score.textContent = `Score : ${photo.score}`;
+
+                const result = document.createElement('div');
+                result.className = 'result';
+
+                if (photo.victoire) {
+                    result.textContent = 'Victoire';
+                    result.classList.add('result-victoire');
+                } else if (photo.matchNul) {
+                    result.textContent = 'Match nul';
+                    result.classList.add('result-nul');
+                } else if (photo.defaite) {
+                    result.textContent = 'Défaite';
+                    result.classList.add('result-defaite');
+                }
+
+                photoInfo.appendChild(teamName);
+                photoInfo.appendChild(score);
+                photoInfo.appendChild(result);
+                photoCard.appendChild(img);
+                photoCard.appendChild(deleteButton);
+                photoCard.appendChild(photoInfo);
+                gallery.appendChild(photoCard);
+            });
+        }
+
+        async function deletePhoto(photoId, imageUrl) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette photo ?')) {
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                // Supprimer l'image de Storage
+                const storageRef = storage.refFromURL(imageUrl);
+                await storageRef.delete();
+
+                // Supprimer le document de Firestore
+                await db.collection("matchPhotos").doc(photoId).delete();
+
+                // Recharger les photos
+                await loadPhotosForAdmin();
+                alert('Photo supprimée avec succès !');
+            } catch (error) {
+                console.error("Erreur : ", error);
+                alert("Erreur lors de la suppression de la photo.");
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
