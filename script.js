@@ -78,15 +78,26 @@ async function handleFormSubmit(e) {
     document.getElementById('loading').style.display = 'block';
 
     try {
-        // Lire l'image en base64 (au lieu de l'uploader dans Storage)
+        // Compresser l'image avant upload
+        const compressedImage = await compressImage(file, 800, 800, 0.7); // Largeur max: 800px, Qualité: 0.7
+
+        // Lire l'image compressée en base64
         const reader = new FileReader();
         reader.onload = async (event) => {
             const base64Image = event.target.result;
 
-            // Ajouter les données + l'image en base64 dans Firestore
+            // Vérifier que la taille en base64 ne dépasse pas 1 Mo (limite Firestore)
+            if (base64Image.length > 1048576) { // 1 Mo = 1048576 octets
+                alert('L\'image est trop lourde même après compression. Veuillez choisir une image plus petite.');
+                submitButton.disabled = false;
+                document.getElementById('loading').style.display = 'none';
+                return;
+            }
+
+            // Ajouter les données dans Firestore
             await db.collection("matchPhotos").add({
                 team: team,
-                imageBase64: base64Image, // Stockage de l'image en base64
+                imageBase64: base64Image,
                 victoire: isVictoire,
                 matchNul: isMatchNul,
                 defaite: isDefaite,
@@ -97,7 +108,7 @@ async function handleFormSubmit(e) {
             await loadPhotosFromFirebase();
             document.getElementById('photoForm').reset();
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(compressedImage);
     } catch (error) {
         console.error("Erreur : ", error);
         alert("Erreur lors de l'upload.");
@@ -105,6 +116,44 @@ async function handleFormSubmit(e) {
         submitButton.disabled = false;
         document.getElementById('loading').style.display = 'none';
     }
+}
+
+// Fonction pour compresser une image
+function compressImage(file, maxWidth, maxHeight, quality) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Redimensionner si nécessaire
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width *= ratio;
+                    height *= ratio;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Exporter en JPEG avec la qualité spécifiée
+                canvas.toBlob((blob) => {
+                    resolve(blob);
+                }, 'image/jpeg', quality);
+            };
+            img.src = event.target.result;
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 function renderGallery() {
