@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SELFIES MVBC</title>
+    <title>Galerie de Matchs - Colin Champain</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
@@ -48,10 +48,8 @@
             color: var(--text-primary);
             font-size: 2.5rem;
             font-weight: 700;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
-        /* Formulaire compact */
         .upload-form {
             background: var(--bg-card);
             padding: 20px;
@@ -209,7 +207,6 @@
             border: 1px solid var(--accent-defaite);
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -248,7 +245,6 @@
             cursor: pointer;
         }
 
-        /* Code d'intégration */
         .integration-code {
             background: var(--bg-card);
             padding: 20px;
@@ -291,7 +287,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏆 Galerie de Matchs - Colin Champain</h1>
+        <h1>🏆 Galerie de Matchs</h1>
 
         <div class="upload-form">
             <h2>📤 Ajouter une photo</h2>
@@ -347,14 +343,12 @@
 
         <div class="gallery" id="gallery"></div>
 
-        <!-- Modal -->
         <div id="photoModal" class="modal" onclick="closeModal(event)">
             <span class="close">&times;</span>
             <img class="modal-content" id="modalImage">
             <div class="modal-info" id="modalInfo"></div>
         </div>
 
-        <!-- Code d'intégration -->
         <div class="integration-code">
             <h2>🔗 Code pour intégrer sur ton autre site</h2>
             <p>Copie ce code pour afficher les photos des 5 derniers jours.</p>
@@ -364,27 +358,26 @@
     </div>
 
     <script>
-        // 🔥 Remplace cette configuration par la tienne (depuis Firebase Console)
-       const firebaseConfig = {
-  apiKey: "AIzaSyAX3VP1XWnjTfD3lniuG2EvdDy_lh3kDhE",
-  authDomain: "selfies-c6de9.firebaseapp.com",
-  databaseURL: "https://selfies-c6de9-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "selfies-c6de9",
-  storageBucket: "selfies-c6de9.appspot.com",  // ⚠️ J'ai corrigé l'URL ici (ajout de ".appspot.com")
-  messagingSenderId: "491431782473",
-  appId: "1:491431782473:web:822defb7265176458e7798"
-};
+        // 🔥 Ta configuration Firebase (à ne pas changer)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAX3VP1XWnjTfD3lniuG2EvdDy_lh3kDhE",
+            authDomain: "selfies-c6de9.firebaseapp.com",
+            projectId: "selfies-c6de9",
+            storageBucket: "selfies-c6de9.appspot.com", // ⚠️ Corrigé ici
+            messagingSenderId: "491431782473",
+            appId: "1:491431782473:web:822defb7265176458e7798"
+        };
 
         // Initialiser Firebase
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = firebase.firestore(); // ⚠️ On utilise Firestore, pas Realtime Database
         const storage = firebase.storage();
 
         // Variables globales
         let photos = [];
         let filteredPhotos = [];
 
-        // Charger les photos depuis Firebase
+        // Charger les photos depuis Firestore
         document.addEventListener('DOMContentLoaded', () => {
             loadPhotosFromFirebase();
             document.getElementById('photoForm').addEventListener('submit', handleFormSubmit);
