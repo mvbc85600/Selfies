@@ -45,6 +45,7 @@ async function loadPhotosFromFirebase() {
     }
 }
 
+// Dans la fonction handleFormSubmit, remplace le bloc d'upload Storage par ceci :
 async function handleFormSubmit(e) {
     e.preventDefault();
 
@@ -77,25 +78,26 @@ async function handleFormSubmit(e) {
     document.getElementById('loading').style.display = 'block';
 
     try {
-        // Upload de l'image dans Firebase Storage
-        const storageRef = storage.ref();
-        const fileRef = storageRef.child(`matchPhotos/${Date.now()}_${file.name}`);
-        const uploadTask = await fileRef.put(file);
-        const imageUrl = await uploadTask.ref.getDownloadURL();
+        // Lire l'image en base64 (au lieu de l'uploader dans Storage)
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const base64Image = event.target.result;
 
-        // Ajouter les données dans Firestore
-        await db.collection("matchPhotos").add({
-            team: team,
-            imageUrl: imageUrl,
-            victoire: isVictoire,
-            matchNul: isMatchNul,
-            defaite: isDefaite,
-            score: score,
-            date: new Date().toISOString()
-        });
+            // Ajouter les données + l'image en base64 dans Firestore
+            await db.collection("matchPhotos").add({
+                team: team,
+                imageBase64: base64Image, // Stockage de l'image en base64
+                victoire: isVictoire,
+                matchNul: isMatchNul,
+                defaite: isDefaite,
+                score: score,
+                date: new Date().toISOString()
+            });
 
-        await loadPhotosFromFirebase();
-        document.getElementById('photoForm').reset();
+            await loadPhotosFromFirebase();
+            document.getElementById('photoForm').reset();
+        };
+        reader.readAsDataURL(file);
     } catch (error) {
         console.error("Erreur : ", error);
         alert("Erreur lors de l'upload.");
@@ -115,8 +117,9 @@ function renderGallery() {
         photoCard.onclick = () => openModal(photo);
 
         const img = document.createElement('img');
-        img.src = photo.imageUrl;
+        img.src = photo.imageBase64; // Utilise l'image en base64
         img.alt = `${photo.team} - ${photo.score}`;
+
 
         const photoInfo = document.createElement('div');
         photoInfo.className = 'photo-info';
@@ -189,7 +192,7 @@ function openModal(photo) {
     const modalImage = document.getElementById('modalImage');
     const modalInfo = document.getElementById('modalInfo');
 
-    modalImage.src = photo.imageUrl;
+    modalImage.src = photo.imageBase64; // Utilise l'image en base64
 
     let resultText = '';
     if (photo.victoire) resultText = '✅ Victoire';
@@ -243,7 +246,7 @@ function updateIntegrationCode() {
 
         code += `
     <div style="background: #121212; border-radius: 8px; padding: 8px; border: 1px solid rgba(255, 255, 255, 0.1); max-width: 250px;">
-        <img src="${photo.imageUrl}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px;">
+        <img src="${photo.imageBase64}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 8px;">
         <div style="padding: 0 8px;">
             <div style="color: #e0e0e0; font-weight: bold;">${photo.team}</div>
             <div style="color: #4caf50;">Score : ${photo.score}</div>
